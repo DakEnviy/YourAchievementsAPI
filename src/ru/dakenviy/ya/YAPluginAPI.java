@@ -6,11 +6,14 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 import me.AdityaTD.TitlesAPI.TitlesAPI;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 
 public class YAPluginAPI {
 	private YAPlugin main;
@@ -65,8 +68,7 @@ public class YAPluginAPI {
 		if (isRegistered(achievement)) {
 			if (radius == -1) {
 				for (Player op : Bukkit.getOnlinePlayers()) {
-					Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + op.getName() +
-							achievement.getMessage(player.getName(), !op.getName().equalsIgnoreCase(player.getName())));
+					sendJSONMessage(op, achievement.getMessage(player.getName(), !op.getName().equalsIgnoreCase(player.getName())));
 				}
 				if (player.isOnline()) {
 					Player p = (Player) player;
@@ -81,8 +83,7 @@ public class YAPluginAPI {
 			else if (radius == 0) {
 				if (player.isOnline()) {
 					Player p = (Player) player;
-					Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + p.getName() +
-							achievement.getMessage(player.getName(), false));
+					sendJSONMessage(p, achievement.getMessage(player.getName(), false));
 					
 					if (useTitlesAPI && main.titlesAPI)
 						TitlesAPI.sendTitle(p, 20, 50, 20,
@@ -95,8 +96,7 @@ public class YAPluginAPI {
 			else if (radius > 0) {
 				if (player.isOnline()) {
 					Player p = (Player) player;
-					Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + p.getName() +
-							achievement.getMessage(player.getName(), false));
+					sendJSONMessage(p, achievement.getMessage(player.getName(), false));
 					
 					if (useTitlesAPI && main.titlesAPI)
 						TitlesAPI.sendTitle(p, 20, 50, 20,
@@ -107,8 +107,7 @@ public class YAPluginAPI {
 					
 					for (Entity e : p.getNearbyEntities(radius, radius, radius)) {
 						if (e.getType() == EntityType.PLAYER)
-							Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + ((Player)e).getName() +
-									achievement.getMessage(player.getName(), true));
+							sendJSONMessage((Player)e, achievement.getMessage(player.getName(), true));
 					}
 				}
 			}
@@ -130,5 +129,10 @@ public class YAPluginAPI {
 			return main.data.get(achievement).contains(player.getUniqueId());
 		}
 		return false;
+	}
+	
+	public void sendJSONMessage(Player player, String json) {
+		PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a(json));
+		((CraftPlayer)player).getHandle().playerConnection.sendPacket(packet);
 	}
 }
