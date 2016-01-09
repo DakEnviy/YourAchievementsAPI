@@ -1,0 +1,13 @@
+name: YourAchievements
+version: 1.0
+description: Add your custom achievements and manage their.
+author: DakEnviy
+
+main: ru.dakenviy.ya.YAPlugin
+database: false
+
+commands:
+  YourAchievements:
+    usage: '§cSyntax error! Usage: §e/ya <give/remove> [params]'
+    description: All YourAchievements commands
+    aliases: [ya]
